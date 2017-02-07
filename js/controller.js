@@ -1,5 +1,4 @@
-
 angular.module('RouteControllers', [])
-	.controller('HomeController', function($scope) {
-		$scope.title = "Welcome To Angular Todo!"
-	});
+    .controller('HomeController', function($scope) {
+        $scope.title = "Welcome To Angular Todo!";
+    });
