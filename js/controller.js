@@ -8,6 +8,15 @@ angular.module('RouteControllers', [])
         $scope.registrationUser = {};
         var URL ="https://morning-castle-91468.herokuapp.com/";
 
+        $scope.login = function (){
+            UserAPIService.callAPI(URL + "accounts/api-token-auth/", $scope.data).then(function(results) {
+                $scope.token= results.data.token;
+                console.log($scope.token);
+            }).catch(function(err) {
+                console.log(err.data);
+            });
+        };
+
         $scope.submitForm = function() {
             if ($scope.registrationForm.$valid) {
                 $scope.registrationUser.username = $scope.user.username;
