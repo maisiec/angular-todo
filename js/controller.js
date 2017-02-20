@@ -4,16 +4,23 @@ angular.module('RouteControllers', [])
         console.log($location.path());
         console.log($location.hash());
     })
-    .controller('RegisterController', function($scope, $location, UserAPIService) {
+    .controller('RegisterController', function($scope, $location, UserAPIService, store) {
 
         $scope.registrationUser = {};
-        var URL ="https://morning-castle-91468.herokuapp.com/docs/";
+        var URL ="https://morning-castle-91468.herokuapp.com/";
 
+        var authStorage ={
+            name:"StorageTest"
+        };
+
+        store.set('obj', authStorage);
 
  $scope.login = function (){
              UserAPIService.callAPI(URL + "accounts/api-token-auth/", $scope.data).then(function(results) {
                  $scope.token= results.data.token;
-                 console.log($scope.token);
+                 store.set('username', $scope.registrationUser.username);
+                 store.set('authToken', $scope.token);
+                 //console.log($scope.token);
              }).catch(function(err) {
                  console.log(err.data); 
              });
@@ -26,9 +33,10 @@ angular.module('RouteControllers', [])
 
                 console.log($scope.registrationUser);
 
-                UserAPIService.registerUser(URL+ "accounts/register/", $scope.registrationUser).then(function(results){
+                UserAPIService.callAPI(URL+ "accounts/register/", $scope.registrationUser).then(function(results){
                     $scope.data=results.data;
                      alert("You have successfully registered to Angular Todo");
+                     $scope.login();
                  }).catch(function(err) {
                      alert("Oops! something went wrong!");
                      console.log (err);
@@ -37,4 +45,47 @@ angular.module('RouteControllers', [])
 
           /*  console.log($scope.registrationUser.username + " " + $scope.registrationUser.password); */
         };
+    })
+
+.controller('TodoController', function($scope, $location, TodoAPIService, store) {
+        var URL = "https://morning-castle-91468.herokuapp.com/";
+
+    $scope.authToken = store.get('authToken');
+    $scope.username = store.get('username');
+
+    $scope.todos = [];
+
+    TodoAPIService.getTodos(URL + "todo/", $scope.username, $scope.authToken).then(function(resutls) {
+        $scope.todo = results.data || [];
+        console.log($scope.todos);
+    }).catch(function(err){
+        console.log(err);
     });
+
+    $scope.submitForm = function(){
+        if($scope.todoForm.$valid){
+            $scope.todo.username = $scope.username;
+            $scope.todos.push($scope.todo);
+
+            TodoAPIService.createTodo(URL + "todo/", $scope.todo, $scope.authToken).then(function(results) {
+                console.log(results);
+            }).catch(function(err){
+                console.log(err);
+            });
+        }
+    },
+ $scope.editTodo = function(id) {
+        $location.path("/todo/edit/" + id);
+    },
+ 
+    $scope.deleteTodo = function(id) {
+        TodoAPIService.deleteTodo(url + "todo/" + id, $scope.username, $scope.authToken).then(function(results) {
+            console.log(results);
+        }).catch(function(err) {
+                console.log(err);
+        });
+    };
+});
+    
+     
+    
